@@ -12,6 +12,7 @@ export default function ResultVideo({filename,transcriptionItems}) {
   const [primaryColor, setPrimaryColor] = useState('#FFFFFF');
   const [outlineColor, setOutlineColor] = useState('#000000');
   const [progress, setProgress] = useState(1);
+  const [outputUrl, setOutputUrl] = useState(null);
   const ffmpegRef = useRef(new FFmpeg());
   const videoRef = useRef(null);
 
@@ -64,33 +65,48 @@ export default function ResultVideo({filename,transcriptionItems}) {
       'output.mp4'
     ]);
     const data = await ffmpeg.readFile('output.mp4');
-    videoRef.current.src =
-      URL.createObjectURL(new Blob([data.buffer], {type: 'video/mp4'}));
+    const outputBlob = new Blob([data.buffer], {type: 'video/mp4'});
+    const outputUrl = URL.createObjectURL(outputBlob);
+    videoRef.current.src = outputUrl;
+    setOutputUrl(outputUrl);
     setProgress(1);
   }
 
   return (
     <>
-      <div className="mb-4">
-        <button
-          onClick={transcode}
-          className="bg-green-600 py-2 px-6 rounded-full inline-flex gap-2 border-2 border-purple-700/50 cursor-pointer">
-          <SparklesIcon />
-          <span>Apply captions</span>
-        </button>
-      </div>
-      <div>
-        primary color:
-        <input type="color"
-               value={primaryColor}
-               onChange={ev => setPrimaryColor(ev.target.value)}/>
-        <br />
-        outline color:
-        <input type="color"
-               value={outlineColor}
-               onChange={ev => setOutlineColor(ev.target.value)}/>
-      </div>
       <div className="rounded-xl overflow-hidden relative">
+        <video className="resize-y border-2 border-purple-700/50"
+            data-video={0}
+            ref={videoRef}
+            controls>
+        </video>
+        <div className="mb-4 justify-center gap-4 inline-block">
+          <button
+            onClick={transcode}
+            className="bg-green-600 py-2 px-6 rounded-full inline-flex gap-2 border-2 border-purple-700/50 cursor-pointer">
+            <SparklesIcon />
+            <span>Apply captions</span>
+          </button>
+          {outputUrl && (
+            <a
+              href={outputUrl}
+              download="output.mp4"
+              className="bg-blue-600 py-2 px-6 rounded-full inline-flex gap-2 border-2 border-purple-700/50 cursor-pointer ml-4">
+              <span>Download video</span>
+            </a>
+          )}
+          <div>
+            primary color:
+            <input type="color"
+                   value={primaryColor}
+                   onChange={ev => setPrimaryColor(ev.target.value)}/>
+            <br />
+            outline color:
+            <input type="color"
+                   value={outlineColor}
+                   onChange={ev => setOutlineColor(ev.target.value)}/>
+          </div>
+        </div>
         {progress && progress < 1 && (
           <div className="absolute inset-0 bg-black/80 flex items-center">
             <div className="w-full text-center">
@@ -105,11 +121,6 @@ export default function ResultVideo({filename,transcriptionItems}) {
             </div>
           </div>
         )}
-        <video
-          data-video={0}
-          ref={videoRef}
-          controls>
-        </video>
       </div>
     </>
   );

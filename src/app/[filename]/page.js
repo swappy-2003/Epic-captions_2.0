@@ -11,10 +11,12 @@ export default function FilePage({params}) {
   const [isFetchingInfo, setIsFetchingInfo] = useState(false);
   const [awsTranscriptionItems, setAwsTranscriptionItems] = useState([]);
 
+  // Fetch transcription data when the filename changes
   useEffect(() => {
     getTranscription();
   }, [filename]);
 
+  // Function to get transcription data from the API
   function getTranscription() {
     setIsFetchingInfo(true);
     axios.get('/api/transcribe?filename='+filename).then(response => {
@@ -26,7 +28,6 @@ export default function FilePage({params}) {
         setTimeout(getTranscription, 3000);
       } else {
         setIsTranscribing(false);
-
         setAwsTranscriptionItems(
           clearTranscriptionItems(transcription.results.items)
         );
@@ -34,29 +35,32 @@ export default function FilePage({params}) {
     });
   }
 
+  // Display a message while transcribing
   if (isTranscribing) {
     return (
       <div>Transcribing your video...</div>
     );
   }
 
+  // Display a message while fetching information
   if (isFetchingInfo) {
     return (
       <div>Fetching information...</div>
     );
   }
 
+  // Render the transcription editor and result video
   return (
     <div>
       <div className="grid sm:grid-cols-2 gap-8 sm:gap-16">
         <div className="">
-          <h2 className="text-2xl mb-4 text-white/60">Transcription</h2>
+          <h2 className="text-2xl mb-1   text-white/60">Transcription</h2>
           <TranscriptionEditor
             awsTranscriptionItems={awsTranscriptionItems}
             setAwsTranscriptionItems={setAwsTranscriptionItems} />
         </div>
         <div>
-          <h2 className="text-2xl mb-4 text-white/60">Result</h2>
+          <h2 className="text-2xl mb-1 text-white/60">Result</h2>
           <ResultVideo
             filename={filename}
             transcriptionItems={awsTranscriptionItems} />

@@ -5,6 +5,7 @@ export default function TranscriptionEditor({
   setAwsTranscriptionItems,
 }) {
 
+  // Function to update a transcription item
   function updateTranscriptionItem(index, prop, ev) {
     const newAwsItems = [...awsTranscriptionItems];
     const newItem = {...newAwsItems[index]};
@@ -21,7 +22,7 @@ export default function TranscriptionEditor({
         <div>Content</div>
       </div>
       {awsTranscriptionItems.length > 0 && (
-        <div className="h-48 sm:h-auto overflow-y-scroll sm:overflow-auto">
+        <div className="h-96 overflow-y-scroll">
           {awsTranscriptionItems.map((item,key) => (
             <div key={key}>
               <TranscriptionItem
