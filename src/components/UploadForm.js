@@ -14,6 +14,10 @@ export default function UploadForm() {
     const files = ev.target.files;
     if (files.length > 0) {
       const file = files[0];
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert("File size exceeds 5MB. Please upload a smaller file.");
+        return;
+      }
       setIsUploading(true);
       const res = await axios.postForm('/api/upload', {
         file,
