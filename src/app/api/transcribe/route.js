@@ -6,7 +6,7 @@ function getClient() {
     region: 'ap-south-1',
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY_2,
     },
   });
 }
@@ -56,7 +56,7 @@ async function getTranscriptionFile(filename) {
     region: 'ap-south-1',
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY_2,
     },
   });
   const getObjectCommand = new GetObjectCommand({
