@@ -14,7 +14,7 @@ export default function Home() {
         <UploadForm />
       </div>
       <DemoSection />
-      <FAQ/>
+      
     </>
   )
 }

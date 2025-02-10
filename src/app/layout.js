@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
             {children}
            
             <section className="mt-8 ">
-             
+             <FAQ />
             </section>
           </div>
         </main>
