@@ -5,7 +5,7 @@ function getClient() {
   return new TranscribeClient({
     region: 'ap-south-1',
     credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY,
+      accessKeyId: process.env.AWS_ACCESS_KEY_2,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY_2,
     },
   });
@@ -55,7 +55,7 @@ async function getTranscriptionFile(filename) {
   const s3client = new S3Client({
     region: 'ap-south-1',
     credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY,
+      accessKeyId: process.env.AWS_ACCESS_KEY_2,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY_2,
     },
   });
