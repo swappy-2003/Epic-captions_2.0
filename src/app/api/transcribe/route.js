@@ -13,11 +13,11 @@ function getClient() {
 function createTranscriptionCommand(filename) {
   return new StartTranscriptionJobCommand({
     TranscriptionJobName: filename,
-    OutputBucketName: process.env.BUCKET_NAME,
+    OutputBucketName: process.env.BUCKET_NAME_2,
     OutputKey: filename + '.transcription',
     IdentifyLanguage: true,
     Media: {
-      MediaFileUri: 's3://' + process.env.BUCKET_NAME + '/'+filename,
+      MediaFileUri: 's3://' + process.env.BUCKET_NAME_2 + '/'+filename,
     },
   });
 }
@@ -60,7 +60,7 @@ async function getTranscriptionFile(filename) {
     },
   });
   const getObjectCommand = new GetObjectCommand({
-    Bucket: process.env.BUCKET_NAME,
+    Bucket: process.env.BUCKET_NAME_2,
     Key: transcriptionFile,
   });
   let transcriptionFileResponse = null;
