@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+
 import { ChevronDownIcon } from "lucide-react"
 
 export default function FAQItem({ question, answer, isOpen, onClick }) {

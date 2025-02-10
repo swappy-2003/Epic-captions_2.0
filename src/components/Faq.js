@@ -1,6 +1,6 @@
 'use client';
 import { useState } from "react"
-import FAQItem from "./FAQItem"
+import FAQItem from "./FaqItem";
 
 const faqData = [
     {
