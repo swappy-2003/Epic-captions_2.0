@@ -1,6 +1,5 @@
 "use client"
 
-
 import { ChevronDownIcon } from "lucide-react"
 
 export default function FAQItem({ question, answer, isOpen, onClick }) {
