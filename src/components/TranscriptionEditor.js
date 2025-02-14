@@ -1,18 +1,34 @@
+import { useEffect, useState } from 'react';
 import TranscriptionItem from "@/components/TranscriptionItem";
 
 export default function TranscriptionEditor({
   awsTranscriptionItems,
   setAwsTranscriptionItems,
 }) {
+  const [renderKey, setRenderKey] = useState(0);
+
+  // Convert content to uppercase by default
+  useEffect(() => {
+    const newAwsItems = awsTranscriptionItems.map(item => ({
+      ...item,
+      content: item.content.toUpperCase()
+    }));
+    setAwsTranscriptionItems(newAwsItems);
+  }, []);
 
   // Function to update a transcription item
   function updateTranscriptionItem(index, prop, ev) {
     const newAwsItems = [...awsTranscriptionItems];
     const newItem = {...newAwsItems[index]};
-    newItem[prop] = ev.target.value;
+    newItem[prop] = prop === 'content' ? ev.target.value.toUpperCase() : ev.target.value;
     newAwsItems[index] = newItem;
     setAwsTranscriptionItems(newAwsItems);
   }
+
+  // Force re-render when awsTranscriptionItems changes
+  useEffect(() => {
+    setRenderKey(prevKey => prevKey + 1);
+  }, [awsTranscriptionItems]);
 
   return (
     <>
@@ -29,7 +45,9 @@ export default function TranscriptionEditor({
                 handleStartTimeChange={ev => updateTranscriptionItem(key, 'start_time', ev)}
                 handleEndTimeChange={ev => updateTranscriptionItem(key, 'end_time', ev)}
                 handleContentChange={ev => updateTranscriptionItem(key, 'content', ev)}
-                item={item} />
+                item={item}
+                key={renderKey} // Use renderKey to force re-render
+              />
             </div>
           ))}
         </div>
