@@ -1,21 +1,25 @@
 'use client';
 import { useState, useRef, useEffect } from "react";
-import axios from "axios";
+
 import SparklesIcon from "@/components/SparklesIcon";
-import { transcriptionItemsToSrt } from "@/libs/awsTranscriptionHelpers";
+import { transcriptionItemsToSrt,transcriptionItemsToAss } from "@/libs/awsTranscriptionHelpers";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { toBlobURL, fetchFile } from "@ffmpeg/util";
 import roboto from "./../fonts/Roboto-Regular.ttf";
 import robotoBold from "./../fonts/Roboto-Bold.ttf";
+import notoSansSemi from "./../fonts/NotoSans_SemiCondensed-Black.ttf"; // Import the new font
 
-export default function ResultVideo({ filename, transcriptionItems }) {
+export default function ResultVideo({ filename, transcriptionItems, setTranscriptionItems }) {
   const videoUrl = "https://swapnil-epic-captionns.s3.amazonaws.com/" + filename;
   const [loaded, setLoaded] = useState(false);
+  
   const [primaryColor, setPrimaryColor] = useState('#FFFFFF');
   const [outlineColor, setOutlineColor] = useState('#000000');
   const [progress, setProgress] = useState(1);
   const [outputUrl, setOutputUrl] = useState(null);
   const [googleDescription, setGoogleDescription] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("hi"); // Default to Hindi
+  const [fontSize, setFontSize] = useState(30); // Default font size
   const ffmpegRef = useRef(new FFmpeg());
   const videoRef = useRef(null);
 
@@ -33,6 +37,7 @@ export default function ResultVideo({ filename, transcriptionItems }) {
     });
     await ffmpeg.writeFile('/tmp/roboto.ttf', await fetchFile(roboto));
     await ffmpeg.writeFile('/tmp/roboto-bold.ttf', await fetchFile(robotoBold));
+    await ffmpeg.writeFile('/tmp/noto-sans-semi.ttf', await fetchFile(notoSansSemi)); // Add the new font
     setLoaded(true);
   };
 
@@ -61,10 +66,11 @@ export default function ResultVideo({ filename, transcriptionItems }) {
         setProgress(videoProgress);
       }
     });
+    
     await ffmpeg.exec([
       '-i', filename,
       '-preset', 'ultrafast',
-      '-vf', `subtitles=subs.srt:fontsdir=/tmp:force_style='Fontname=Roboto Bold,FontSize=30,MarginV=70,PrimaryColour=${toFFmpegColor(primaryColor)},OutlineColour=${toFFmpegColor(outlineColor)}'`,
+      `-vf`, `subtitles=subs.srt:fontsdir=/tmp:force_style='Fontname=Noto Sans SemiCondensed Black,FontSize=${fontSize},MarginV=70,PrimaryColour=${toFFmpegColor(primaryColor)},OutlineColour=${toFFmpegColor(outlineColor)}'`,
       'output.mp4'
     ]);
     const data = await ffmpeg.readFile('output.mp4');
@@ -84,7 +90,7 @@ export default function ResultVideo({ filename, transcriptionItems }) {
       const prompt = transcriptionItems
         .map(item => item.content)
         .join(" ") || "";
-        const prompt2="imagine you are creative description writer just by understanding the video transcribed text that are optimized for search engines with hastag write a description for the video that is engaging and informative and keep it short and just give description of the video";
+        const prompt2="imagine you are creative description writer just by understanding the video transcribed text that are optimized for search engines with hastag write a description for the video in the same language as transcriptions are that is engaging and informative and keep it short and just give description of the video";
         const prompt3= prompt2+prompt;
       const result = await model.generateContent(prompt3);
       setGoogleDescription(result.response.text());
@@ -94,9 +100,33 @@ export default function ResultVideo({ filename, transcriptionItems }) {
     }
   };
 
+  // Translate transcription items using Google Gemini API
+  const translateTranscription = async () => {
+    try {
+      const { GoogleGenerativeAI } = await import("@google/generative-ai");
+      const genAI = new GoogleGenerativeAI("AIzaSyA8HlOxkP6p20D4dD5W6Vwhld17ucOwhhc");
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      const prompt = transcriptionItems
+        .map(item => item.content)
+        .join(" ") || "";
+      const prompt2 = `Translate the following text to ${selectedLanguage}: ${prompt} `;
+      const promt3='Translate the following transcription and return only the translated text, without any additional commentary or metadata:'
+      const prompt4=promt3+prompt2+prompt;
+      const result = await model.generateContent(prompt4);
+      const translatedText = result.response.text();
+      const translatedItems = transcriptionItems.map((item, index) => ({
+        ...item,
+        content: translatedText.split(" ")[index] || item.content
+      }));
+      setTranscriptionItems(translatedItems);
+    } catch (error) {
+      console.error("Error translating transcription via Google AI:", error);
+    }
+  };
+
   return (
     <>
-      <div className="rounded-xl overflow-hidden relative sm:flex sm:justify-center sm:items-center">
+      <div className="rounded-xl overflow-hidden relative flex flex-col sm:flex-row sm:justify-center sm:items-center">
         <video className="resize-y border-2 border-purple-700/50 w-full sm:w-auto"
                data-video={0}
                ref={videoRef}
@@ -137,6 +167,38 @@ export default function ResultVideo({ filename, transcriptionItems }) {
                    value={outlineColor}
                    onChange={ev => setOutlineColor(ev.target.value)}
             />
+          </div>
+          <div className="mt-4 sm:flex sm:flex-col sm:items-center">
+            <label htmlFor="language">Select Language:</label>
+            <select
+              id="language"
+              value={selectedLanguage}
+              onChange={ev => setSelectedLanguage(ev.target.value)}
+              className="border bg-black rounded p-2"
+            >
+              <option value="hi">Hindi</option>
+              <option value="mr">Marathi</option>
+              <option value="gu">Gujarati</option>
+            </select>
+            <button
+              onClick={translateTranscription}
+              className="bg-yellow-600 py-2 px-6 rounded-full inline-flex gap-2 border-2 border-purple-700/50 cursor-pointer mt-2 w-full sm:w-auto"
+            >
+              <span>Translate Transcription</span>
+            </button>
+          </div>
+          <div className="mt-4 sm:flex sm:flex-col sm:items-center">
+            <label htmlFor="fontSize">Font Size:</label>
+            <input
+              type="range"
+              id="fontSize"
+              min="10"
+              max="100"
+              value={fontSize}
+              onChange={ev => setFontSize(ev.target.value)}
+              className="w-full sm:w-auto"
+            />
+            <span>{fontSize}px</span>
           </div>
         </div>
         {progress && progress < 1 && (

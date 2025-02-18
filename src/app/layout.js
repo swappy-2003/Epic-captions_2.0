@@ -37,7 +37,11 @@ export default function RootLayout({ children }) {
                 <Link href="/pricing" className="hover:text-purple-400 transition-colors duration-300">Pricing</Link>
                 <a href="mailto:contact@epiccaptions.com" className="hover:text-purple-400 transition-colors duration-300">Contact</a>
                 <SignedOut>
-                  <SignInButton />
+                <SignInButton>
+          <span className=" px-4 py-2 bg-blue-500 text-white rounded  cursor-pointer">Get Started
+       
+       </span>
+          </SignInButton>
                 </SignedOut>  
                 <SignedIn>
                   <UserButton className="h-15 w-20" />

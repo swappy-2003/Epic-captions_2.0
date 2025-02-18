@@ -1,4 +1,5 @@
 'use client';
+
 import ResultVideo from "@/components/ResultVideo";
 import TranscriptionEditor from "@/components/TranscriptionEditor";
 import {clearTranscriptionItems} from "@/libs/awsTranscriptionHelpers";
@@ -63,7 +64,11 @@ export default function FilePage({params}) {
           <h2 className="text-2xl mb-1 text-white/60">Result</h2>
           <ResultVideo
             filename={filename}
-            transcriptionItems={awsTranscriptionItems} />
+            transcriptionItems={awsTranscriptionItems}
+            
+            setTranscriptionItems={setAwsTranscriptionItems}
+            />
+           
         </div>
       </div>
     </div>
