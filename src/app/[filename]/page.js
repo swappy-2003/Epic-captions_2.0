@@ -39,14 +39,19 @@ export default function FilePage({params}) {
   // Display a message while transcribing
   if (isTranscribing) {
     return (
-      <div>Transcribing your video...</div>
+      
+      <div>
+        <h1> transcribing your video </h1>
+        <span class="loader2"></span>
+        
+      </div>
     );
   }
 
   // Display a message while fetching information
   if (isFetchingInfo) {
     return (
-      <div>Fetching information...</div>
+      <span class="loader"></span>
     );
   }
 

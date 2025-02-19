@@ -31,8 +31,10 @@ export default function UploadForm() {
   return (
     <>
       {isUploading && (
+
         <div className="bg-black/90 text-white fixed inset-0 flex items-center">
           <div className="w-full text-center">
+          <span class="loader"></span>
             <h2 className="text-4xl mb-4">Uploading</h2>
             <h3 className="text-xl">Please wait...</h3>
           </div>
