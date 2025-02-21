@@ -218,7 +218,7 @@ export default function ResultVideo({ filename, transcriptionItems, setTranscrip
       </div>
       {googleDescription && (
         <div className="mt-4 p-4 border rounded shadow sm:flex sm:flex-col sm:items-center">
-          <h3 className="text-xl font-bold">Google Generated Description:</h3>
+          <h3 className="text-xl font-bold">Ai Generated Description:</h3>
           <textarea
             contentEditable="true"
             value={googleDescription}

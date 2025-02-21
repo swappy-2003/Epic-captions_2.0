@@ -14,7 +14,7 @@ export default function FAQItem({ question, answer, isOpen, onClick }) {
           <span className="font-medium text-gray-900">{question}</span>
           <span className="ml-6 h-7 flex items-center">
             <ChevronDownIcon
-              className={`h-6 w-6 transform transition-transform duration-300 ${isOpen ? "-rotate-180" : "rotate-0"}`}
+              className={`h-6 w-6 transform text-purple-800 transition-transform duration-300 ${isOpen ? "-rotate-180" : "rotate-0"}`}
               aria-hidden="true"
             />
           </span>
