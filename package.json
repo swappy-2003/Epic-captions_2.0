@@ -19,6 +19,7 @@
     "aws-crt": "^1.18.0",
     "axios": "^1.5.1",
     "lucide-react": "^0.475.0",
+    "mongodb": "^6.13.1",
     "next": "^15.1.6",
     "react": "latest",
     "react-dom": "latest",
