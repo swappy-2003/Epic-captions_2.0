@@ -1,10 +1,9 @@
 "use server"
-import { User } from "../../../../models/user.model";
+import User from "../modals/user.modal.js";
+import { connect } from "../src/libs/mongodb.js";
 
-import {connect} from "@libs/mongodb";
-
-export async function createUser(user){
-    try{
+export async function createUser(user) {
+    try {
         await connect();
         const newUser = new User(user);
         // Save the new user to the database
@@ -15,5 +14,4 @@ export async function createUser(user){
         console.error(err);
         return err;
     }
-
 }
