@@ -1,7 +1,7 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
-import User from "@/models/User";
-import { connectDB } from "@/lib/db";
+import {User} from "../../../../../modals/user.modal";
+import { connectDB } from "@/libs/db";
 
 export async function POST(req) {
   // Clerk Webhook Signing Secret from .env
@@ -64,7 +64,6 @@ export async function POST(req) {
     } catch (error) {
       console.error("Error saving user:", error);
       return new Response("Error saving user", { status: 500 });
-      return NextResponse.json({ message: "New user created", user: newUser });
       }
   }
 
