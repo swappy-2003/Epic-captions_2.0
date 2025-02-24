@@ -1,6 +1,6 @@
 "use server"
 import User from "../modals/user.modal.js";
-import { connect } from "../src/libs/mongodb.js";
+import { connect } from "../src/libs/db.js";
 
 export async function createUser(user) {
     try {
