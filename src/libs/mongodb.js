@@ -1,21 +1,28 @@
-import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
 
-const uri = process.env.MongoDB_URI;
-const options = { useNewUrlParser: true, useUnifiedTopology: true };
+const MongoDB_URI = process.env.MongoDB_URI;
 
-let client;
-let clientPromise;
+let cached = global.mongoose;
 
-if (!global._mongoClientPromise) {
-  client = new MongoClient(uri, options);
-  global._mongoClientPromise = client.connect().then(conn => {
-    console.log("Connected to MongoDB");
-    return conn;
-  }).catch(error => {
-    console.error("Failed to connect to MongoDB:", error);
-    throw error;
-  });
+if (!cached) {
+  cached = global.mongoose = {
+    conn: null,
+    promise: null,
+  };
 }
 
-clientPromise = global._mongoClientPromise;
-export default clientPromise;
+export const connect = async () => {
+  if (cached.conn) return cached.conn;
+
+  cached.promise =
+    cached.promise ||
+    mongoose.connect(MongoDB_URI, {
+      dbName: "clerkauthv5",
+      bufferCommands: false,
+      connectTimeoutMS: 30000,
+    });
+
+  cached.conn = await cached.promise;
+
+  return cached.conn;
+};
