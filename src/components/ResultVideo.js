@@ -153,7 +153,7 @@ export default function ResultVideo({ filename, transcriptionItems, setTranscrip
             onClick={googleGenerateDescription}
             className="bg-purple-600 py-2 px-6 rounded-full inline-flex gap-2 border-2 border-purple-700/50 cursor-pointer ml-0 sm:ml-4 w-full sm:w-auto"
           >
-            <span>Generate Description via Google AI</span>
+            <span>Generate Description via  AI</span>
           </button>
           <div className="mt-4 sm:flex sm:flex-col sm:items-center">
             Primary color:&nbsp;
