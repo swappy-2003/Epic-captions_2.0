@@ -174,11 +174,13 @@ export default function ResultVideo({ filename, transcriptionItems, setTranscrip
               id="language"
               value={selectedLanguage}
               onChange={ev => setSelectedLanguage(ev.target.value)}
-              className="border bg-black rounded p-2"
+              className="border bg-purple-500 rounded p-2"
             >
               <option value="hi">Hindi</option>
               <option value="mr">Marathi</option>
               <option value="gu">Gujarati</option>
+              <option value="en">English</option>           
+              <option value="hinglish">Hinglish</option>       
             </select>
             <button
               onClick={translateTranscription}
