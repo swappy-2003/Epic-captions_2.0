@@ -5,7 +5,7 @@ import connectToDatabase from "./.././../../../libs/db";
 export default async function handler(req, res) {
   await connectToDatabase();
 
-  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
     return res.status(500).json({ message: "Missing Clerk Webhook Secret" });
