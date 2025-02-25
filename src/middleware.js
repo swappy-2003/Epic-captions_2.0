@@ -1,6 +1,9 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 
-export default clerkMiddleware();
+// Updated middleware with publicRoutes configuration
+export default clerkMiddleware({
+  publicRoutes: ["/api/webhooks/clerk"],
+});
 
 export const config = {
   matcher: [
