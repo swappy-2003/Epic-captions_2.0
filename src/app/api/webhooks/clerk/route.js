@@ -1,71 +1,64 @@
-import { Webhook } from "svix";
-import { headers } from "next/headers";
-import {User} from "../../../../../modals/user.modal";
-import { connectDB } from "@/libs/db";
+import { Webhook } from "svix"; // Clerk uses Svix for webhooks
+import User from "../../../../../modals/user.modal";
+import connectToDatabase from "./.././../../../libs/db";
 
-export async function POST(req) {
-  // Clerk Webhook Signing Secret from .env
-  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+export default async function handler(req, res) {
+  await connectToDatabase();
+
+  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
-    return new Response("Error: SIGNING_SECRET is missing", { status: 500 });
+    return res.status(500).json({ message: "Missing Clerk Webhook Secret" });
   }
 
-  // Connect to MongoDB
-  await connectDB();
-
-  // Initialize Svix Webhook verification
-  const wh = new Webhook(WEBHOOK_SECRET);
-
-  // Get headers
-  const headerPayload = headers();
-  const svix_id = headerPayload.get("svix-id");
-  const svix_timestamp = headerPayload.get("svix-timestamp");
-  const svix_signature = headerPayload.get("svix-signature");
+  // Verify incoming webhook
+  const headers = req.headers;
+  const payload = JSON.stringify(req.body);
+  const svix_id = headers["svix-id"];
+  const svix_timestamp = headers["svix-timestamp"];
+  const svix_signature = headers["svix-signature"];
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response("Error: Missing Svix headers", { status: 400 });
+    return res.status(400).json({ message: "Invalid request headers" });
   }
 
-  // Get request body
-  const payload = await req.json();
-  const body = JSON.stringify(payload);
-
-  let event;
-
-  // Verify Clerk Webhook
   try {
-    event = wh.verify(body, {
+    const wh = new Webhook(WEBHOOK_SECRET);
+    const evt = wh.verify(payload, {
       "svix-id": svix_id,
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
     });
-  } catch (err) {
-    console.error("Webhook verification failed:", err);
-    return new Response("Error: Invalid Webhook Signature", { status: 400 });
-  }
 
-  // Extract event data
-  const { id, type, data } = event;
-  console.log(`Received webhook: ${type} for user ${id}`);
+    const { type, data } = evt;
 
-  // If a new user is created, store metadata in MongoDB
-  if (type === "user.created") {
-    try {
-      const newUser = new User({
+    if (type === "user.created") {
+      const userData = {
         clerkId: data.id,
-        email: data.email_addresses[0].email_address, // Extract email
-        name: `${data.first_name} ${data.last_name}`,
-        metadata: data.public_metadata || {},
-      });
+        email: data.email_addresses[0].email_address,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        imageUrl: data.image_url,
+      };
 
-      await newUser.save();
-      console.log("New user saved to DB:", newUser);
-    } catch (error) {
-      console.error("Error saving user:", error);
-      return new Response("Error saving user", { status: 500 });
-      }
+      await User.create(userData);
+      console.log("User Created in DB:", userData);
+    }
+
+    if (type === "user.deleted") {
+      await User.findOneAndDelete({ clerkId: data.id });
+      console.log("User Deleted from DB:", data.id);
+    }
+
+    res.status(200).json({ message: "Webhook processed successfully" });
+  } catch (error) {
+    console.error("Webhook verification failed:", error);
+    res.status(400).json({ message: "Webhook verification failed" });
   }
-
-  return new Response("Webhook processed successfully", { status: 200 });
 }
+
+export const config = {
+  api: {
+    bodyParser: false, // Clerk sends raw body
+  },
+};
