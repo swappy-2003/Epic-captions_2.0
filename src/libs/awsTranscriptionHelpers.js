@@ -18,26 +18,45 @@ function secondsToHHMMSSMS(timeString) {
   return d.toISOString().slice(11,23).replace('.', ',');
 }
 
-export function transcriptionItemsToSrt(items) {
+export function transcriptionItemsToSrt(items, wordsPerChunk = 2) {
+  if (!items || items.length === 0) return ""; // Handle empty array case
+
   let srt = '';
   let i = 1;
-  items.filter(item => !!item).forEach(item => {
-    // seq
-    srt += i + "\n";
-    // timestamps
-    const {start_time, end_time} = item; // 52.345
-    srt += secondsToHHMMSSMS(start_time)
-      + ' --> '
-      + secondsToHHMMSSMS(end_time)
-      + "\n";
+  let groupedItems = [];
+  let currentGroup = [];
+  let startTime, endTime;
 
-    // content
-    srt += item.content + "\n";
-    srt += "\n";
+  items.forEach((item, index) => {
+    let words = item.content.split(' '); // Split sentence into words
+    words.forEach((word, wordIndex) => {
+      if (currentGroup.length === 0) {
+        startTime = item.start_time; // Start time from first word
+      }
+      currentGroup.push(word);
+
+      // If chunk is full or last word in transcript
+      if (currentGroup.length === wordsPerChunk || (index === items.length - 1 && wordIndex === words.length - 1)) {
+        endTime = item.end_time; // End time from last word in chunk
+        groupedItems.push({ start_time: startTime, end_time: endTime, content: currentGroup.join(' ') });
+        currentGroup = [];
+      }
+    });
+  });
+
+  groupedItems.forEach((chunk) => {
+    srt += `${i}\n`;
+    srt += `${secondsToHHMMSSMS(chunk.start_time)} --> ${secondsToHHMMSSMS(chunk.end_time)}\n`;
+    srt += `${chunk.content}\n\n`;
     i++;
   });
+
   return srt;
 }
+
+
+
+
 export function transcriptionItemsToAss(items) {
   let ass = `[Script Info]
 Title: Styled Subtitles

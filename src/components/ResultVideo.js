@@ -1,8 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from "react";
-
 import SparklesIcon from "@/components/SparklesIcon";
-import { transcriptionItemsToSrt,transcriptionItemsToAss } from "@/libs/awsTranscriptionHelpers";
+import { transcriptionItemsToSrt } from "@/libs/awsTranscriptionHelpers";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { toBlobURL, fetchFile } from "@ffmpeg/util";
 import roboto from "./../fonts/Roboto-Regular.ttf";
@@ -12,14 +11,15 @@ import notoSansSemi from "./../fonts/NotoSans_SemiCondensed-Black.ttf"; // Impor
 export default function ResultVideo({ filename, transcriptionItems, setTranscriptionItems }) {
   const videoUrl = "https://swapnil-epic-captionns.s3.amazonaws.com/" + filename;
   const [loaded, setLoaded] = useState(false);
-  
   const [primaryColor, setPrimaryColor] = useState('#FFFFFF');
   const [outlineColor, setOutlineColor] = useState('#000000');
   const [progress, setProgress] = useState(1);
   const [outputUrl, setOutputUrl] = useState(null);
   const [googleDescription, setGoogleDescription] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("hi"); // Default to Hindi
-  const [fontSize, setFontSize] = useState(30); // Default font size
+  const [fontSize, setFontSize] = useState(20); // Default font size
+  const [srtUrl, setSrtUrl] = useState(null); // URL for the SRT file
+  const [wordsPerChunk, setWordsPerChunk] = useState(2); // New state for words per chunk (min 1, max 3)
   const ffmpegRef = useRef(new FFmpeg());
   const videoRef = useRef(null);
 
@@ -48,7 +48,7 @@ export default function ResultVideo({ filename, transcriptionItems, setTranscrip
 
   const transcode = async () => {
     const ffmpeg = ffmpegRef.current;
-    const srt = transcriptionItemsToSrt(transcriptionItems);
+    const srt = transcriptionItemsToSrt(transcriptionItems, wordsPerChunk);
     await ffmpeg.writeFile(filename, await fetchFile(videoUrl));
     await ffmpeg.writeFile('subs.srt', srt);
     videoRef.current.src = videoUrl;
@@ -70,9 +70,10 @@ export default function ResultVideo({ filename, transcriptionItems, setTranscrip
     await ffmpeg.exec([
       '-i', filename,
       '-preset', 'ultrafast',
-      `-vf`, `subtitles=subs.srt:fontsdir=/tmp:force_style='Fontname=Noto Sans SemiCondensed Black,FontSize=${fontSize},MarginV=70,PrimaryColour=${toFFmpegColor(primaryColor)},OutlineColour=${toFFmpegColor(outlineColor)}'`,
+      '-vf', `subtitles=subs.srt:fontsdir=/tmp:force_style='Fontname=Noto Sans SemiCondensed Black,FontSize=${fontSize},MarginV=70,PrimaryColour=${toFFmpegColor(primaryColor)},OutlineColour=${toFFmpegColor(outlineColor)}'`,
       'output.mp4'
     ]);
+    
     const data = await ffmpeg.readFile('output.mp4');
     const outputBlob = new Blob([data.buffer], { type: 'video/mp4' });
     const outputUrl = URL.createObjectURL(outputBlob);
@@ -124,6 +125,8 @@ export default function ResultVideo({ filename, transcriptionItems, setTranscrip
     }
   };
 
+  
+
   return (
     <>
       <div className="rounded-xl overflow-hidden relative flex flex-col sm:flex-row sm:justify-center sm:items-center">
@@ -153,7 +156,7 @@ export default function ResultVideo({ filename, transcriptionItems, setTranscrip
             onClick={googleGenerateDescription}
             className="bg-purple-600 py-2 px-6 rounded-full inline-flex gap-2 border-2 border-purple-700/50 cursor-pointer ml-0 sm:ml-4 w-full sm:w-auto"
           >
-            <span>Generate Description via  AI</span>
+            <span>Generate Description via AI</span>
           </button>
           <div className="mt-4 sm:flex sm:flex-col sm:items-center">
             Primary color:&nbsp;
@@ -202,6 +205,18 @@ export default function ResultVideo({ filename, transcriptionItems, setTranscrip
             />
             <span>{fontSize}px</span>
           </div>
+          <div className="mt-4 sm:flex sm:flex-col sm:items-center">
+            <label htmlFor="wordsPerChunk">Words per Caption (1-3):</label>
+            <input
+              type="number"
+              id="wordsPerChunk"
+              value={wordsPerChunk}
+              min="1"
+              max="3"
+              onChange={ev => setWordsPerChunk(Number(ev.target.value))}
+              className="border rounded p-2 w-20 text-center text-zinc-900"
+            />
+          </div>
         </div>
         {progress && progress < 1 && (
           <div className="absolute inset-0 bg-black/80 flex items-center">
@@ -220,9 +235,9 @@ export default function ResultVideo({ filename, transcriptionItems, setTranscrip
       </div>
       {googleDescription && (
         <div className="mt-4 p-4 border rounded shadow sm:flex sm:flex-col sm:items-center">
-          <h3 className="text-xl font-bold">Ai Generated Description:</h3>
+          <h3 className="text-xl font-bold">AI Generated Description:</h3>
           <textarea
-            contentEditable="true"
+            readOnly
             value={googleDescription}
             rows="5"
             className="w-full p-2 border rounded text-zinc-800"

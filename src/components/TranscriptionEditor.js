@@ -9,12 +9,14 @@ export default function TranscriptionEditor({
 
   // Convert content to uppercase by default
   useEffect(() => {
-    const newAwsItems = awsTranscriptionItems.map(item => ({
-      ...item,
-      content: item.content.toUpperCase()
-    }));
-    setAwsTranscriptionItems(newAwsItems);
-  }, []);
+    if (awsTranscriptionItems.length > 0) {
+      const newAwsItems = awsTranscriptionItems.map(item => ({
+        ...item,
+        content: item.content.toUpperCase()
+      }));
+      setAwsTranscriptionItems(newAwsItems);
+    }
+  }, [awsTranscriptionItems]); // Add awsTranscriptionItems as a dependency
 
   // Function to update a transcription item
   function updateTranscriptionItem(index, prop, ev) {
