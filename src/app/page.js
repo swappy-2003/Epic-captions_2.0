@@ -2,6 +2,7 @@ import DemoSection from "@/components/DemoSection";
 import PageHeaders from "@/components/PageHeaders";
 import UploadForm from "@/components/UploadForm";
 import { SignedIn, SignedOut,SignInButton } from '@clerk/nextjs';
+import FAQ from '@/components/Faq';
 
 export default function Home() {
   return (
@@ -27,6 +28,8 @@ export default function Home() {
        
       </div>
       <DemoSection />
+
+     <div className="pt-12"> <FAQ  /></div>
     </>
   )
 }

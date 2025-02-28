@@ -1,4 +1,4 @@
-import FAQ from '@/components/Faq';
+
 import './globals.css'
 import SparklesIcon from "@/components/SparklesIcon";
 import { dark,shadesOfPurple,neobrutalism } from '@clerk/themes';
@@ -67,7 +67,7 @@ export default function RootLayout({ children }) {
               <div className="px-4 sm:px-8">
                 {children}
                 <section className="mt-8 ">
-                  <FAQ />
+                 
                 </section>
               </div>
             </main>
